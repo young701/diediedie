@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>동원참치 — 닭가슴살 장례식 기획안 (Clean & Readable)</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* 팀장님 지정 컬러코드 */
+    --c-deep-blue: #1f3f99;
+    --c-mid-blue: #005cb9;
+    --c-cyan: #00a0e9;
+    --c-red: #e30019;
+    --c-orange: #f45321;
+    --c-yellow: #ffe906;
+
+    /* 깔끔한 다크 테마 시스템 컬러 */
+    --bg-main: #0b0f19; 
+    --bg-surface: #131a28; 
+    --bg-surface-alt: #1c2436;
+    --border-color: #2a3449;
+    --text-primary: #ffffff;
+    --text-secondary: #a0aec0;
+    --text-muted: #718096;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: 'Pretendard', sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Typography - 네온 제거, 가독성 최우선 */
+  h1, h2, h3, h4 {
+    font-family: 'Black Han Sans', sans-serif;
+    font-weight: 400;
+    line-height: 1.2;
+    margin-bottom: 16px;
+    letter-spacing: -1px;
+  }
+  
+  p { 
+    font-size: 1.15rem; 
+    line-height: 1.65; 
+    color: var(--text-secondary); 
+    font-weight: 400;
+    word-break: keep-all; 
+  }
+
+  strong { color: var(--text-primary); font-weight: 700; }
+  
+  /* 깔끔한 컬러 포인트 (Glow 없음) */
+  .color-red { color: var(--c-red); }
+  .color-cyan { color: var(--c-cyan); }
+  .color-yellow { color: var(--c-yellow); }
+  .color-orange { color: var(--c-orange); }
+
+  /* Layout Base */
+  .presentation { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    opacity: 0; visibility: hidden;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 0 8vw; 
+    transition: opacity 0.4s ease-in-out, visibility 0.4s;
+  }
+
+  .slide.active { opacity: 1; visibility: visible; }
+
+  .container { width: 100%; max-width: 1400px; margin: 0 auto; }
+
+  /* 정돈된 헤더 영역 (좌측 정렬 통일) */
+  .slide-header { margin-bottom: 40px; }
+  
+  .badge {
+    display: inline-block;
+    padding: 6px 16px;
+    background-color: var(--bg-surface-alt);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 700;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
+    border-left: 4px solid var(--c-cyan);
+  }
+
+  .slide-title { font-size: clamp(36px, 4vw, 54px); color: var(--text-primary); }
+  .slide-desc { font-size: 1.3rem; color: var(--text-secondary); margin-top: 12px; }
+
+  /* Grids */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: stretch; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
+
+  /* Animations */
+  .reveal { opacity: 0; transform: translateY(15px); transition: all 0.5s ease-out; }
+  .slide.active .reveal { opacity: 1; transform: translateY(0); }
+  .delay-1 { transition-delay: 0.1s; }
+  .delay-2 { transition-delay: 0.2s; }
+
+  /* 깔끔한 박스 UI */
+  .box {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 40px;
+  }
+
+  .box-title { font-size: 1.6rem; color: var(--text-primary); margin-bottom: 16px; }
+
+  /* Idea Focus Area (Left) */
+  .idea-point {
+    font-size: 1.8rem; 
+    color: var(--c-yellow); 
+    margin-bottom: 24px; 
+    font-family: 'Black Han Sans', sans-serif;
+    line-height: 1.4;
+  }
+
+  .agent-note {
+    margin-top: 40px;
+    padding: 24px;
+    background-color: rgba(0, 160, 233, 0.05);
+    border-left: 4px solid var(--c-cyan);
+    border-radius: 0 8px 8px 0;
+  }
+  .agent-note h4 { font-size: 1rem; color: var(--c-cyan); margin-bottom: 8px; font-family: 'Pretendard', sans-serif; font-weight: 700;}
+  .agent-note p { font-size: 1rem; color: var(--text-secondary); margin: 0;}
+
+  /* Visual Story Area (Right) */
+  .story-board {
+    background-color: #000000;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 50px 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+  }
+  
+  .story-board::before {
+    content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px;
+    background-color: var(--c-red); /* 슬라이드마다 인라인으로 컬러 변경 */
+  }
+
+  .story-label { font-size: 1rem; color: var(--text-muted); font-weight: 700; margin-bottom: 16px; text-transform: uppercase; letter-spacing: 2px;}
+  .story-scene { font-size: 1.25rem; line-height: 1.7; color: var(--text-primary); margin-bottom: 24px; word-break: keep-all; }
+  .story-tags { font-size: 0.95rem; color: var(--c-cyan); font-weight: 600; }
+
+  /* Cover & VS Slide */
+  .center-align { text-align: center; }
+  .center-align .badge { border-left: none; border-top: 4px solid var(--c-cyan); }
+  
+  .cover-title { font-size: clamp(60px, 7vw, 100px); margin-bottom: 24px; line-height: 1.1; }
+  
+  .vs-wrapper { display: flex; align-items: stretch; gap: 30px; margin-top: 20px; }
+  .vs-card { flex: 1; padding: 40px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; }
+  .vs-card.new { border-color: var(--c-cyan); background-color: rgba(0, 160, 233, 0.05); }
+  .vs-card ul { list-style: none; margin-top: 24px; }
+  .vs-card li { font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 16px; padding-left: 16px; position: relative; }
+  .vs-card li::before { content: '•'; position: absolute; left: 0; color: var(--text-muted); }
+  .vs-arrow { align-self: center; font-size: 2rem; color: var(--text-muted); }
+
+  /* Navigation */
+  .nav-controls {
+    position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 24px; align-items: center; z-index: 100;
+  }
+  .nav-btn { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; transition: color 0.2s; }
+  .nav-btn:hover { color: var(--text-primary); }
+  .progress-track { width: 160px; height: 4px; background-color: var(--border-color); border-radius: 2px; overflow: hidden; }
+  .progress-fill { height: 100%; background-color: var(--c-cyan); width: 0%; transition: width 0.3s ease; }
+</style>
+</head>
+<body>
+
+<div class="presentation" id="presentation">
+
+  <div class="slide active">
+    <div class="container reveal center-align">
+      <div class="badge" style="border-top-color: var(--c-deep-blue);">제47회 제일기획 아이디어 페스티벌</div>
+      <h1 class="cover-title">시대의 종언:<br><span class="color-red">닭가슴살 장례식</span></h1>
+      <p style="font-size: 1.6rem; color: var(--text-secondary);">팍팍한 시대는 갔다, 맛있는 고단백 참치의 승천(昇天)</p>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="container">
+      <div class="slide-header reveal">
+        <div class="badge" style="border-left-color: var(--c-mid-blue);">BACKGROUND</div>
+        <h2 class="slide-title">다이어터의 냉동실엔 <span class="color-yellow">'의무감'</span>이 쌓여있다</h2>
+        <p class="slide-desc">단백질 섭취의 훌륭한 대안인 동원참치가, 왜 닭가슴살의 자리를 뺏지 못하고 있을까요?</p>
+      </div>
+      
+      <div class="grid-3 reveal delay-1">
+        <div class="box" style="border-top: 3px solid var(--text-muted);">
+          <h3 class="box-title">닭가슴살의 한계</h3>
+          <p>퍽퍽하고 맛없다. 냉동 보관이라 해동이 번거롭고 공간을 많이 차지한다. 매일 먹는 닭가슴살은 이미 '식사'가 아닌 <strong>'의무'</strong>가 되었습니다.</p>
+        </div>
+        <div class="box" style="border-top: 3px solid var(--c-cyan);">
+          <h3 class="box-title color-cyan">동원참치의 스펙</h3>
+          <p>단백질 함량이 비등하며 가격 경쟁력도 훌륭합니다. 무엇보다 <strong>실온 보관</strong>이 가능하고 <strong>'맛'</strong>이 압도적으로 좋습니다.</p>
+        </div>
+        <div class="box" style="border-top: 3px solid var(--c-red);">
+          <h3 class="box-title color-red">포지셔닝의 오류</h3>
+          <p>그럼에도 타깃은 동원참치를 '요리용 반찬'으로만 인식합니다. 다이어트 식단의 디폴트값인 닭가슴살의 아성을 무너뜨릴 <strong>충격 요법</strong>이 필요합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="container">
+      <div class="slide-header reveal">
+        <div class="badge">INSIGHT</div>
+        <h2 class="slide-title">닭가슴살의 희생에 감사를, 이제는 <span class="color-cyan">참치로 승천할 때</span></h2>
+        <p class="slide-desc">경쟁을 넘어 아예 기존 카테고리(닭가슴살)의 사망을 선고하는 도발적인 장례식</p>
+      </div>
+      
+      <div class="vs-wrapper reveal delay-1">
+        <div class="vs-card">
+          <h3 class="box-title" style="color: var(--text-muted); text-align: center;">지겨운 닭가슴살 (Past)</h3>
+          <ul>
+            <li>냉동 보관의 번거로움</li>
+            <li>퍽퍽하고 질리는 맛</li>
+            <li>억지로 욱여넣는 의무감</li>
+          </ul>
+        </div>
+        <div class="vs-arrow">➔</div>
+        <div class="vs-card new">
+          <h3 class="box-title color-cyan" style="text-align: center;">새로운 대안 동원참치 (New)</h3>
+          <ul>
+            <li>어디서든 간편한 <strong>실온 보관</strong></li>
+            <li>다양한 레시피가 가능한 <strong>손맛</strong></li>
+            <li>맛있게 채우는 <strong>단백질의 기쁨</strong></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="container grid-2">
+      <div class="reveal">
+        <div class="slide-header">
+          <div class="badge" style="border-left-color: var(--text-primary);">IDEA 01: FILM</div>
+          <h2 class="slide-title">엄숙하고 도발적인 선전포고<br><span class="color-yellow">닭가슴살 고별사</span></h2>
+        </div>
+        
+        <div class="idea-point">"그동안 수고했다. 하지만 팍팍한 네 시대는 갔다."</div>
+        <p>엄숙한 장례식장, 쌓여있는 닭가슴살 팩 앞에서 남자가 고별사를 낭독합니다. 애도가 끝나자 남자는 유쾌한 근육 세리머니와 함께 동원참치 캔을 시원하게 따며 새로운 시대의 개막을 알립니다.</p>
+
+        <div class="agent-note">
+          <h4>MARKETING POINT</h4>
+          <p>다이어터들이 마음속으로만 생각하던 '닭가슴살에 대한 지겨움'을 브랜드가 대신 꼬집어주며 강력한 밈(Meme)을 형성하는 스토리텔링입니다.</p>
+        </div>
+      </div>
+
+      <div class="reveal delay-1 story-board" style="border-top-color: var(--text-primary);">
+        <div class="story-label">Visual Storyboard</div>
+        <p class="story-scene">엄숙한 클래식 음악. 팍팍한 닭가슴살 팩들이 제단에 쌓여있고, 한 남자가 고별사를 읽는다.<br><br>"그는 팍팍했지만, 든든했습니다. 하지만 이제 우리는... 더 맛있는 <strong>'손맛'</strong>이 필요합니다."</p>
+        <p class="story-scene">고별사가 끝남과 동시에 남자는 제단 위 동원참치 캔을 근육을 뽐내며 유쾌하게 딴다. 따는 순간 화면이 컬러풀하고 힙한 고단백 레시피 영상으로 반전된다.</p>
+        <div class="story-tags">#근육으로의첫걸음 #단백질은당겨야제맛</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="container grid-2">
+      <div class="reveal">
+        <div class="slide-header">
+          <div class="badge" style="border-left-color: var(--c-cyan);">IDEA 02: B.E.</div>
+          <h2 class="slide-title">팍팍함과의 유쾌한 이별<br><span class="color-yellow">닭가슴살 환승 센터</span></h2>
+        </div>
+        
+        <div class="idea-point color-cyan">냉동실 악성 재고를 참치로 Trade-in</div>
+        <p>오프라인 팝업 &lt;닭가슴살 환승 센터&gt; 오픈. 질려서 못 먹고 냉동실에 박아둔 닭가슴살을 가져오면, 맛있는 고단백 '동원참치' 새 제품으로 교환해 줍니다. (수거된 닭가슴살은 유기동물 보호소에 기부)</p>
+
+        <div class="agent-note">
+          <h4>MARKETING POINT</h4>
+          <p>단순한 전시형 팝업을 넘어 타깃이 직접 기존 식단을 포기하고 참치를 선택하는 물리적 행동(Trade-in)을 유도하여 즉각적인 제품 경험률(Trial)을 높입니다.</p>
+        </div>
+      </div>
+
+      <div class="reveal delay-1 story-board" style="border-top-color: var(--c-cyan);">
+        <div class="story-label">Visual Storyboard</div>
+        <p class="story-scene"><strong>[닭가슴살 납골당]</strong><br>타깃이 꽝꽝 언 냉동 닭가슴살을 가져와 컨베이어 벨트에 올리며 애도한다. 그 보상으로 갓 생산된 동원참치 캔을 받는다.</p>
+        <p class="story-scene"><strong>[오리지널 손맛 챌린지]</strong><br>환승한 동원참치 캔을 가장 힙하게, 손가락 근육을 뽐내며 따는 챌린지 존. 도파민을 자극하는 손맛 측정 게이지가 올라간다.</p>
+        <div class="story-tags" style="color: var(--c-cyan);">#닭가슴살삼가고인의명복을 #오늘의손맛</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="container grid-2">
+      <div class="reveal">
+        <div class="slide-header">
+          <div class="badge" style="border-left-color: var(--c-orange);">IDEA 03: OOH</div>
+          <h2 class="slide-title">일상에 침투하는 부고장<br><span class="color-yellow">삼가 닭의 명복을</span></h2>
+        </div>
+        
+        <div class="idea-point color-orange">출퇴근길을 사로잡는 흑백의 부고장</div>
+        <p>지하철 스크린도어, 헬스장 인근 광고판에 엄숙한 흑백 디자인의 [부고] 소식을 띄웁니다. 닭가슴살의 죽음을 애도하는 문구 아래, 소셜 미디어의 #손맛챌린지 우승자들의 세리머니를 인터랙티브 전광판으로 전시합니다.</p>
+
+        <div class="agent-note" style="border-color: var(--c-orange); background-color: rgba(244, 83, 33, 0.05);">
+          <h4 style="color: var(--c-orange);">MARKETING POINT</h4>
+          <p>헬스장 인근 등 타깃의 '다이어트 TPO'에 도발적인 부고장을 노출시켜 호기심을 유발하고, 자발적인 SNS 인증샷 공유를 통해 바이럴을 확산시킵니다.</p>
+        </div>
+      </div>
+
+      <div class="reveal delay-1 story-board" style="border-top-color: var(--c-orange);">
+        <div class="story-label">Visual Storyboard</div>
+        <p class="story-scene">엄숙한 흑백 전광판. 블랙 리본과 함께 문구가 뜬다.<br><strong>[부고] 닭가슴살 삼가 고인의 명복을 빕니다.</strong></p>
+        <p class="story-scene">한순간, 화면이 컬러로 반전되며 #오늘의손맛 챌린지 우승자의 탄탄한 근육 손길과 동원참치 캔이 시원하게 열리는 임팩트 있는 장면이 송출된다.</p>
+        <div class="story-tags" style="color: var(--c-orange);">#단백질충전손맛부터 #치토스마냥</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide">
+    <div class="container center-align">
+      <div class="slide-header reveal">
+        <div class="badge" style="border-top-color: var(--c-deep-blue); border-left: none;">EXPECTED EFFECT</div>
+        <h2 class="slide-title">동원참치는 요리 재료를 넘어<br><span class="color-cyan">힙한 다이어트식의 디폴트</span>가 됩니다.</h2>
+      </div>
+      
+      <div class="grid-2 reveal delay-1" style="max-width: 1000px; margin: 40px auto 0;">
+        <div class="box" style="text-align: left; border-top: 4px solid var(--c-red);">
+          <h3 class="box-title color-red">완벽한 리포지셔닝</h3>
+          <p>참치캔을 '가끔 먹는 반찬'에서 '매일 먹는 고단백 필수 식단'으로 소비자의 인식을 완벽하게 이동시킵니다.</p>
+        </div>
+        <div class="box" style="text-align: left; border-top: 4px solid var(--c-cyan);">
+          <h3 class="box-title color-cyan">시장 파이 스틸(Steal)</h3>
+          <p>닭가슴살에 지쳐있던 거대한 다이어터 시장의 소비자를 동원참치로 대거 유입시켜 실질적인 매출 증대를 견인합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="nav-controls reveal">
+  <button class="nav-btn" onclick="prevSlide()">◀</button>
+  <div class="progress-track">
+    <div class="progress-fill" id="progressBar"></div>
+  </div>
+  <button class="nav-btn" onclick="nextSlide()">▶</button>
+</div>
+
+<script>
+  let currentSlide = 0;
+  const slides = document.querySelectorAll('.slide');
+  const progressBar = document.getElementById('progressBar');
+  const totalSlides = slides.length;
+
+  function updateSlide() {
+    slides.forEach((slide, index) => {
+      if (index === currentSlide) slide.classList.add('active');
+      else slide.classList.remove('active');
+    });
+    const progress = ((currentSlide + 1) / totalSlides) * 100;
+    progressBar.style.width = progress + '%';
+  }
+
+  function nextSlide() {
+    if (currentSlide < totalSlides - 1) { currentSlide++; updateSlide(); }
+  }
+  function prevSlide() {
+    if (currentSlide > 0) { currentSlide--; updateSlide(); }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') nextSlide();
+    else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevSlide();
+  });
+
+  updateSlide();
+</script>
+
+</body>
+</html>
